@@ -8,6 +8,30 @@ const typeDefs = gql`
   }
 
   """
+  Sorting options for profile connections.
+  """
+  enum ProfileOrderByInput {
+    "Order profiles ascending by username."
+    username_ASC
+    "Order profiles descending by username."
+    username_DESC
+  }
+
+  """
+  Information about pagination in a connection.
+  """
+  type PageInfo {
+    "The cursor to continue from when paginating forward."
+    endCursor: String
+    "Whether there are more items when paginating forward."
+    hasNextPage: Boolean!
+    "Whether there are more items when paginating backward."
+    hasPreviousPage: Boolean!
+    "the cursor to continue from when paginating backward."
+    startCursor: String
+  }
+
+  """
   A profile contains metadata about a specific user.
   """
   type Profile @key(fields: "id") {
@@ -20,7 +44,13 @@ const typeDefs = gql`
     "A short bio or description about the user (max 256 characters.)"
     description: String
     "Other users that the user follows."
-    following: [Profile]
+    following(
+      first: Int
+      after: String
+      last: Int
+      before: String
+      orderBy: ProfileOrderByInput
+    ): ProfileConnection
     "The full name of the user."
     fullName: String
     "The unique username of the user."
@@ -29,11 +59,27 @@ const typeDefs = gql`
     viewerIsFollowing: Boolean
   }
 
+  "A list of profile edges with pagination information."
+  type ProfileConnection {
+    "A list of profile edges."
+    edges: [ProfileEdge]
+    "Informaton to assist with pagination."
+    pageInfo: PageInfo!
+  }
+
+  "A single profile node with its cursor."
+  type ProfileEdge {
+    "A cursor for use in pagination."
+    cursor: ID!
+    "A profile at the end of an edge."
+    node: Profile!
+  }
+
   """
   Provides data to create a new user profile.
   """
   input CreateProfileInput {
-    "The new user's uniqu Auth0 ID."
+    "The new user's unique Auth0 ID."
     accountId: ID!
     "A short bio or description about the user (max 265 characters.)"
     description: String
@@ -83,9 +129,19 @@ const typeDefs = gql`
     "Retrieves a single profile by username."
     profile(username: String!): Profile!
     "Retrieves a list of profiles."
-    profiles: [Profile]
+    profiles(
+      after: String
+      before: String
+      first: Int
+      last: Int
+      orderBy: ProfileOrderByInput
+    ): ProfileConnection
     "Performs a search of user profiles."
-    searchProfiles(query: ProfileSearchInput!): [Profile]
+    searchProfiles(
+      after: String
+      first: Int
+      query: ProfileSearchInput!
+    ): ProfileConnection
   }
 
   extend type Mutation {
