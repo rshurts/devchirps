@@ -1,12 +1,6 @@
 import { gql } from "apollo-server";
 
 const typeDefs = gql`
-  extend type Account @key(fields: "id") {
-    id: ID! @external
-    "Metadata about the user that owns the account."
-    profile: Profile
-  }
-
   """
   Sorting options for profile connections.
   """
@@ -27,7 +21,7 @@ const typeDefs = gql`
     hasNextPage: Boolean!
     "Whether there are more items when paginating backward."
     hasPreviousPage: Boolean!
-    "the cursor to continue from when paginating backward."
+    "The cursor to continue from when paginating backward."
     startCursor: String
   }
 
@@ -123,6 +117,12 @@ const typeDefs = gql`
     fullName: String
     "The udpate unique username of the user."
     username: String
+  }
+
+  extend type Account @key(fields: "id") {
+    id: ID! @external
+    "Metadata about the user that owns the account."
+    profile: Profile
   }
 
   extend type Query {

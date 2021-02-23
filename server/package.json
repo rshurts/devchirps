@@ -10,8 +10,9 @@
   "scripts": {
     "dev": "concurrently -k npm:dev:*",
     "dev:accounts": "nodemon -r dotenv/config -r esm --watch ./src/services/accounts ./src/services/accounts/index.js",
+    "dev:content": "nodemon -r dotenv/config -r esm --watch ./src/services/content ./src/services/content/index.js",
     "dev:profiles": "nodemon -r dotenv/config -r esm --watch ./src/services/profiles ./src/services/profiles/index.js",
-    "dev:gateway": "wait-on tcp:4001 && wait-on tcp:4002 && nodemon -r dotenv/config -r esm --ignore ./src/services ./src/index.js",
+    "dev:gateway": "wait-on tcp:4001 && wait-on tcp:4002 && wait-on tcp:4003 && nodemon -r dotenv/config -r esm --ignore ./src/services ./src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
