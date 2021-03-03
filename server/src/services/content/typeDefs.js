@@ -14,6 +14,34 @@ const typeDefs = gql`
   }
 
   """
+  Sorting options for the reply connection.
+  """
+  enum ReplyOrderByInput {
+    "Order replies ascending by creation time."
+    createdAt_ASC
+    "Order replies decending by creation time."
+    createdAt_DESC
+  }
+
+  """
+  Specifies common fields for post and replies.
+  """
+  interface Content {
+    "The unique MongoDB document ID of the content."
+    id: ID!
+    "The profile of the user who authored the content."
+    author: Profile!
+    "The date and time the content was created."
+    createdAt: DateTime!
+    "Whether the content is blocked."
+    isBlocked: Boolean
+    "The URL of a media file associated with the content."
+    media: String
+    "The body content (max. 256 characters.)"
+    text: String!
+  }
+
+  """
   Information about pagination in a connection.
   """
   type PageInfo {
@@ -30,7 +58,7 @@ const typeDefs = gql`
   """
   A post contain content authored by a user.
   """
-  type Post {
+  type Post implements Content {
     "The unique MongoDB document ID of the post."
     id: ID!
     "The profile of the user who authored the post."
@@ -43,6 +71,14 @@ const typeDefs = gql`
     media: String
     "The body content of the post (max. 256 characters.)"
     text: String!
+    "Replies to this post."
+    replies(
+      after: String
+      before: String
+      first: Int
+      last: Int
+      orderBy: ReplyOrderByInput
+    ): ReplyConnection
   }
 
   """
@@ -66,12 +102,66 @@ const typeDefs = gql`
   }
 
   """
+  A reply contains content that is a response to a post.
+  """
+  type Reply implements Content {
+    "The unique MongoDB document ID of the reply."
+    id: ID!
+    "The profile of the user who authored the reply."
+    author: Profile!
+    "The date and time the reply was created."
+    createdAt: DateTime!
+    "Whether the reply is blocked."
+    isBlocked: Boolean
+    "The URL of a media file associated with the content."
+    media: String
+    "The parent post of the reply."
+    post: Post
+    "The author of the parent post of the reply."
+    postAuthor: Profile
+    "The body content of the reply (max. 256 characters.)"
+    text: String!
+  }
+
+  """
+  A list of reply edge with pagniation information.
+  """
+  type ReplyConnection {
+    "A list of reply edges."
+    edges: [ReplyEdge]
+    "Information to assist with pagination."
+    pageInfo: PageInfo!
+  }
+
+  """
+  A single reply node with its cursor.
+  """
+  type ReplyEdge {
+    "A cursor for use in pagination."
+    cursor: ID!
+    "A reply at the end of an edge."
+    node: Reply!
+  }
+
+  """
   Provides data to create a post.
   """
   input CreatePostInput {
     "The body content of the post (max. 256 characters.)"
     text: String!
     "The unique username of the user who authored the post."
+    username: String!
+  }
+
+  """
+  Provides the data to create a reply to a post.
+  """
+  input CreateReplyInput {
+    "The unique MongoDB document ID of the parent post."
+    postId: ID!
+    "The body content of the reply (max. 256 characters.)"
+    text: String!
+    "The unique username of the user who authored the reply."
     username: String!
   }
 
@@ -101,6 +191,16 @@ const typeDefs = gql`
     includeBlocked: Boolean
   }
 
+  """
+  Provides a filter on which replies may be queried.
+  """
+  input ReplyWhereInput {
+    "The unique username of the user who sent the replies."
+    from: String
+    "The unique username of the user who recieved the replies."
+    to: String
+  }
+
   extend type Profile @key(fields: "id") {
     id: ID! @external
     "A list of posts written by the user."
@@ -111,6 +211,14 @@ const typeDefs = gql`
       last: Int
       orderBy: PostOrderByInput
     ): PostConnection
+    "A list of replies written by the user."
+    replies(
+      after: String
+      before: String
+      first: Int
+      last: Int
+      orderBy: ReplyOrderByInput
+    ): ReplyConnection
   }
 
   extend type Query {
@@ -125,6 +233,17 @@ const typeDefs = gql`
       orderBy: PostOrderByInput
       filter: PostWhereInput
     ): PostConnection
+    "Retrieves a single reply by MongoDB document ID."
+    reply(id: ID!): Reply!
+    "Retrives a list of replies."
+    replies(
+      after: String
+      before: String
+      first: Int
+      last: Int
+      orderBy: ReplyOrderByInput
+      filter: ReplyWhereInput!
+    ): ReplyConnection
   }
 
   extend type Mutation {
@@ -132,6 +251,10 @@ const typeDefs = gql`
     createPost(data: CreatePostInput!): Post!
     "Deletes a post."
     deletePost(where: ContentWhereUniqueInput!): ID!
+    "Creates a new reply to a post."
+    createReply(data: CreateReplyInput!): Reply!
+    "Deletes a reply to a post."
+    deleteReply(where: ContentWhereUniqueInput!): ID!
   }
 `;
 
