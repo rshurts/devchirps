@@ -192,6 +192,14 @@ const typeDefs = gql`
   }
 
   """
+  Provides a search string to query posts by text in their body content.
+  """
+  input PostSearchInput {
+    "The text string to search for in the post content."
+    text: String!
+  }
+
+  """
   Provides a filter on which replies may be queried.
   """
   input ReplyWhereInput {
@@ -244,6 +252,11 @@ const typeDefs = gql`
       orderBy: ReplyOrderByInput
       filter: ReplyWhereInput!
     ): ReplyConnection
+    searchPosts(
+      after: String
+      first: Int
+      query: PostSearchInput!
+    ): PostConnection!
   }
 
   extend type Mutation {

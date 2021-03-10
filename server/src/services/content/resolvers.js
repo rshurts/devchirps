@@ -70,6 +70,18 @@ const resolvers = {
     posts(parent, args, { dataSources }, info) {
       return dataSources.contentAPI.getPosts(args);
     },
+    searchPosts(
+      parent,
+      { after, first, query: { text } },
+      { dataSources },
+      info
+    ) {
+      return dataSources.contentAPI.searchPosts({
+        after,
+        first,
+        searchString: text,
+      });
+    },
     reply(parent, { id }, { dataSources }, info) {
       return dataSources.contentAPI.getReplyById(id);
     },
