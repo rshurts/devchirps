@@ -20,7 +20,7 @@ const resolvers = {
       return post._id;
     },
     isBlocked(post, args, context, info) {
-      return post.isBlocked;
+      return post.blocked;
     },
     replies(post, args, { dataSources }, info) {
       return dataSources.contentAPI.getPostReplies({
@@ -53,7 +53,7 @@ const resolvers = {
       return reply._id;
     },
     isBlocked(reply, args, context, info) {
-      return reply.isBlocked;
+      return reply.blocked;
     },
     post(reply, args, { dataSources }, info) {
       return dataSources.contentAPI.getPostById(reply.postId);
@@ -102,6 +102,12 @@ const resolvers = {
     },
     deleteReply(parent, { where: { id } }, { dataSources }, info) {
       return dataSources.contentAPI.deleteReply(id);
+    },
+    togglePostBlock(parent, { where: { id } }, { dataSources }, info) {
+      return dataSources.contentAPI.togglePostBlock(id);
+    },
+    toggleReplyBlock(parent, { where: { id } }, { dataSources }, info) {
+      return dataSources.contentAPI.toggleReplyBlock(id);
     },
   },
 };
