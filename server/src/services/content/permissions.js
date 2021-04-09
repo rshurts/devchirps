@@ -58,7 +58,7 @@ const isEditingOwnReply = rule()(
     const profile = await dataSources.contentAPI.Profile.findOne({
       accountId: user.sub,
     }).exec();
-    const post = await dataSources.contentAPI.Reply.findById(id);
+    const reply = await dataSources.contentAPI.Reply.findById(id);
 
     if (!profile || !reply) {
       return false;
