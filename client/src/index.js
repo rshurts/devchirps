@@ -1,12 +1,26 @@
+import { ApolloProvider } from "@apollo/client";
+import { Grommet } from "grommet";
+import { Router } from "react-router-dom";
 import React from "react";
 import ReactDOM from "react-dom";
-import "./index.css";
+
 import reportWebVitals from "./reportWebVitals";
 
+import client from "./graphql/apollo";
+import Routes from "./routes";
+import history from "./routes/history";
+import GlobalStyle from "./styles/global";
+import theme from "./styles/theme";
+
 const App = () => (
-  <div>
-    <p>Hello, world!</p>
-  </div>
+  <ApolloProvider client={client}>
+    <GlobalStyle />
+    <Grommet theme={theme}>
+      <Router history={history}>
+        <Routes />
+      </Router>
+    </Grommet>
+  </ApolloProvider>
 );
 
 ReactDOM.render(
