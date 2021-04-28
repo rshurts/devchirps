@@ -4,8 +4,11 @@ import React from "react";
 
 import MainLayout from "../../layouts/MainLayout";
 import AccentButton from "../../components/AccentButton";
+import { useAuth } from "../../context/AuthContext";
 
 const Index = () => {
+  const { login } = useAuth();
+
   return (
     <MainLayout centered>
       <Box align={"center"} margin={{ top: "small" }} width={"100%"}>
@@ -14,7 +17,7 @@ const Index = () => {
           <AccentButton
             label={"Login / Sign-up"}
             maring={{ top: "medium" }}
-            onClick={() => console.log("Clicked!")}
+            onClick={login}
           />
         </div>
       </Box>
