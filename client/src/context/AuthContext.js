@@ -2,6 +2,8 @@ import createAuth0Client from "@auth0/auth0-spa-js";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 import history from "../routes/history";
+import { createApolloClient } from "../graphql/apollo";
+import { GET_VIEWER } from "../graphql/queries";
 
 const AuthContext = createContext();
 const useAuth = () => useContext(AuthContext);
@@ -17,6 +19,7 @@ const AuthProvider = ({ children }) => {
   const [auth0Client, setAuth0Client] = useState();
   const [checkingSession, setCheckingSession] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [viewerQuery, setViewerQuery] = useState(null);
 
   useEffect(() => {
     const initializeAuth0 = async () => {
@@ -37,6 +40,12 @@ const AuthProvider = ({ children }) => {
           history.replace("/home");
         } else if (history.location.pathname === "/login") {
           history.replace("/");
+        } else if (authenticated) {
+          const apolloClient = createApolloClient((...p) =>
+            client.getTokenSilently(...p)
+          );
+          const viewer = await apolloClient.query({ query: GET_VIEWER });
+          setViewerQuery(viewer);
         }
       } catch {
         // On error send the user back to the login page to try again.
@@ -52,6 +61,7 @@ const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         checkingSession,
+        getToken: (...p) => auth0Client.getTokenSilently(...p),
         isAuthenticated,
         login: (...p) => auth0Client.loginWithRedirect(...p),
         logout: (...p) =>
@@ -59,6 +69,9 @@ const AuthProvider = ({ children }) => {
             ...p,
             returnTo: process.env.REACT_APP_AUTH0_LOGOUT_URL,
           }),
+        updateViewer: (viewer) =>
+          setViewerQuery({ ...viewerQuery, data: { viewer } }),
+        viewerQuery,
       }}
     >
       {children}
